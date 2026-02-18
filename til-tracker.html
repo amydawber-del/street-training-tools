@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TiL Tracker — Product Training</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --text--dark--50: #19191e;
+    --brand--black: #242326;
+    --text--dark--40: #4c4d57;
+    --text--dark--30: #777989;
+    --true-black: black;
+    --transparent: #fff0;
+    --card-light-grey: #f8f8f8;
+    --text--white--30: #979797;
+    --text--light--40: #b2b2b2;
+    --accent--blue--300: #527dff;
+    --accent-blue--200: #7a9cff;
+    --text--dark--20: #a8aabb;
+    --action-primary-blue: #2147f4;
+    --white: white;
+    --light-grey: #ccc;
+    --text-dark-10: #dfe0ec;
+    --ui--underline--light-grey: #e5e5e5;
+    --success-green: #bde4b9;
+    --brand--yellow: #f1c238;
+    --brand-accent--mandarin-light: #f6be9d;
+    --accent-blue--100: #a3baff;
+    --brand-accent--dusty-red-light: #f9b4bc;
+    --brand--secondary--lightgreen: #beffd8;
+    --accent-blue--50: #b8caff;
+    --white-smoke: #fde8eb;
+    --nav-opacity: #ffffff0d;
+    --brand-accent--cream: #f5ede5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    color: #333;
+    background-color: #fff;
+    min-height: 100%;
+    margin: 0;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background-color: var(--brand--black);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .header-divider {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--text--dark--20);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-label {
+    font-size: 12px;
+    color: var(--text--dark--20);
+  }
+
+  select.trainer-dd {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    outline: none;
+    min-width: 120px;
+  }
+
+  select.trainer-dd option { background: var(--brand--black); color: #fff; }
+  select.trainer-dd:focus { border-color: var(--accent--blue--300); }
+
+  /* ── HAMBURGER MENU ── */
+  .hamburger-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 8px 10px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    gap: 4px;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .hamburger-btn:hover { background: rgba(255,255,255,0.28); }
+
+  .hamburger-btn .bar {
+    display: block;
+    width: 16px;
+    height: 2px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .hamburger-btn.open .bar:first-child  { transform: translateY(6px) rotate(45deg); }
+  .hamburger-btn.open .bar:nth-child(2) { opacity: 0; width: 0; }
+  .hamburger-btn.open .bar:last-child   { transform: translateY(-6px) rotate(-45deg); }
+
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    min-width: 220px;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .nav-menu.open { display: block; }
+
+  .nav-menu-header {
+    padding: 10px 14px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a8aabb;
+    border-bottom: 1px solid #e5e5e5;
+    background: #f8f8f8;
+  }
+
+  .nav-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    text-decoration: none;
+    color: #4c4d57;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Arial, sans-serif;
+    border-bottom: 1px solid #e5e5e5;
+    background: #ffffff;
+  }
+
+  .nav-menu a:last-child { border-bottom: none; }
+  .nav-menu a:hover { background: #f8f8f8; color: #19191e; }
+
+  .nav-menu a .nav-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #dfe0ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* ── PAGE TITLE ── */
+  .page-title-row {
+    margin-bottom: 22px;
+  }
+
+  .page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text--dark--50);
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text--dark--30);
+    margin-top: 2px;
+  }
+
+  /* ── KPI ROW ── */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .kpi-card {
+    background: var(--card-light-grey);
+    border: 1px solid var(--ui--underline--light-grey);
+    border-radius: 8px;
+    padding: 18px 20px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text--dark--30);
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .kpi-value.blue  { color: var(--action-primary-blue); }
+  .kpi-value.green { color: #2a7d3f; }
+  .kpi-value.red   { color: #c0392b; }
+  .kpi-value.dark  { color: var(--text--dark--50); }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--text--dark--30);
+    margin-top: 5px;
+  }
+
+  /* ── MAIN GRID ── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--ui--underline--light-grey);
+    border-radius: 8px;
+    padding: 22px 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--ui--underline--light-grey);
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text--dark--50);
+  }
+
+  .card-meta {
+    font-size: 12px;
+    color: var(--text--dark--30);
+  }
+
+  /* ── CHART ── */
+  .chart-wrap { height: 220px; position: relative; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 12px; }
+
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text--dark--40);
+    margin-bottom: 5px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text--dark--50);
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 20px;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent--blue--300);
+    box-shadow: 0 0 0 3px var(--accent-blue--50);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 64px; }
+
+  .type-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--light-grey);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .type-toggle button {
+    padding: 8px 10px;
+    border: none;
+    border-right: 1px solid var(--light-grey);
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    background: #fff;
+    color: var(--text--dark--30);
+    transition: all 0.15s;
+  }
+
+  .type-toggle button:last-child { border-right: none; }
+  .type-toggle button.active.earned { background: var(--brand--secondary--lightgreen); color: #1a6632; }
+  .type-toggle button.active.taken  { background: var(--white-smoke); color: #9e2a35; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    line-height: 20px;
+  }
+
+  .btn-primary { background: var(--action-primary-blue); color: #fff; }
+  .btn-primary:hover { background: #1839d4; }
+
+  .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 5px; }
+
+  .btn-approve {
+    background: var(--brand--secondary--lightgreen);
+    color: #1a6632;
+    border: 1px solid #8fd4a8;
+    font-weight: 700;
+  }
+  .btn-approve:hover { background: #a3f0be; }
+
+  .btn-delete {
+    background: none;
+    border: 1px solid var(--ui--underline--light-grey);
+    color: var(--text--dark--20);
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-delete:hover { border-color: #f9b4bc; color: #c0392b; background: var(--white-smoke); }
+
+  /* ── FILTER TABS ── */
+  .filter-tabs { display: flex; gap: 4px; }
+
+  .filter-tab {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid var(--ui--underline--light-grey);
+    background: #fff;
+    cursor: pointer;
+    color: var(--text--dark--30);
+    font-family: Arial, sans-serif;
+    transition: all 0.15s;
+  }
+
+  .filter-tab.active {
+    background: var(--text--dark--50);
+    color: #fff;
+    border-color: var(--text--dark--50);
+  }
+
+  /* ── TABLE ── */
+  .entries-table { width: 100%; border-collapse: collapse; }
+
+  .entries-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text--dark--30);
+    padding: 0 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--ui--underline--light-grey);
+    white-space: nowrap;
+  }
+
+  .entries-table td {
+    padding: 11px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--ui--underline--light-grey);
+    color: var(--text--dark--40);
+    vertical-align: middle;
+  }
+
+  .entries-table tr:last-child td { border-bottom: none; }
+  .entries-table tbody tr:hover td { background: var(--card-light-grey); }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .badge-earned  { background: var(--brand--secondary--lightgreen); color: #1a6632; }
+  .badge-taken   { background: var(--white-smoke); color: #9e2a35; }
+  .badge-approved { background: var(--success-green); color: #1a6632; font-size: 10px; padding: 2px 8px; }
+  .badge-pending  { background: var(--brand-accent--cream); color: #8a5a20; font-size: 10px; padding: 2px 8px; }
+
+  .hours-pos { color: #2a7d3f; font-weight: 700; }
+  .hours-neg { color: #c0392b; font-weight: 700; }
+
+  .approval-meta {
+    font-size: 11px;
+    color: var(--text--dark--30);
+    margin-top: 4px;
+    line-height: 16px;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 10px;
+    padding: 28px;
+    width: 380px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    animation: modalIn 0.18s ease;
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.96) translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text--dark--50);
+    margin-bottom: 6px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--text--dark--30);
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ui--underline--light-grey);
+  }
+
+  .approver-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+
+  .approver-btn {
+    padding: 10px 14px;
+    border: 1px solid var(--ui--underline--light-grey);
+    border-radius: 6px;
+    background: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text--dark--40);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .approver-btn:hover {
+    border-color: var(--accent--blue--300);
+    background: #f5f8ff;
+    color: var(--action-primary-blue);
+  }
+
+  .approver-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--text-dark-10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text--dark--40);
+    flex-shrink: 0;
+  }
+
+  .modal-cancel {
+    width: 100%;
+    padding: 8px;
+    background: none;
+    border: 1px solid var(--ui--underline--light-grey);
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text--dark--30);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .modal-cancel:hover { background: var(--card-light-grey); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text--dark--30);
+    font-size: 13px;
+  }
+
+  .empty-icon { font-size: 28px; margin-bottom: 10px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .kpi-row   { grid-template-columns: 1fr 1fr; }
+    header     { padding: 0 16px; }
+    .page-wrap { padding: 20px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="hamburger-wrap">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open navigation">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <div class="nav-menu-header">Navigation</div>
+        <a href="dashboard.html">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="til-tracker.html" onclick="closeMenu(); return false;">
+          <span class="nav-icon">⏱</span> TiL Tracker
+        </a>
+        <a href="survey.html">
+          <span class="nav-icon">📝</span> Training Survey
+        </a>
+        <a href="training-request.html">
+          <span class="nav-icon">📋</span> Training Request
+        </a>
+        <a href="https://drive.google.com/file/d/1ksyx7WQ8iOGi9OOU6kYP8tx7rS0j3EII/view?usp=sharing" target="_blank">
+          <span class="nav-icon">📄</span> Training Menu ↗
+        </a>
+      </nav>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-logo">TiL Tracker</div>
+    <div class="header-divider"></div>
+    <div class="header-sub">Product Training Team</div>
+  </div>
+  <div class="header-right">
+    <span class="header-label">Product trainer</span>
+    <select class="trainer-dd" id="trainerSelect" onchange="switchTrainer()">
+      <option value="Amy">Amy</option>
+      <option value="Max">Max</option>
+      <option value="Mat">Mat</option>
+      <option value="Jess">Jess</option>
+    </select>
+  </div>
+</header>
+
+<!-- APPROVAL MODAL -->
+<div class="modal-overlay" id="approvalModal">
+  <div class="modal">
+    <div class="modal-title">Approve TiL Request</div>
+    <div class="modal-sub" id="modalSub"></div>
+    <div class="approver-list" id="approverList"></div>
+    <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="page-wrap">
+
+  <div class="page-title-row">
+    <div class="page-title" id="pageTitle">Amy</div>
+    <div class="page-subtitle" id="pageSubtitle">Time in Lieu balance overview</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-label">TiL Balance</div>
+      <div class="kpi-value blue" id="kpiBalance">0.0 hrs</div>
+      <div class="kpi-sub" id="kpiBalanceSub">Current balance</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Accrued</div>
+      <div class="kpi-value green" id="kpiAccrued">0.0 hrs</div>
+      <div class="kpi-sub" id="kpiAccruedCount">0 entries</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Taken</div>
+      <div class="kpi-value red" id="kpiTaken">0.0 hrs</div>
+      <div class="kpi-sub" id="kpiTakenCount">0 entries</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Pending Approval</div>
+      <div class="kpi-value dark" id="kpiPending">0</div>
+      <div class="kpi-sub">TiL taken entries</div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- CHART -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Balance Over Time</span>
+        <span class="card-meta">Running hours balance</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="balanceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- LOG FORM -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Log Entry</span>
+      </div>
+
+      <div class="form-group">
+        <label>Type</label>
+        <div class="type-toggle">
+          <button class="active earned" id="typeEarned" onclick="setType('earned')">▲ TiL Earned</button>
+          <button id="typeTaken" onclick="setType('taken')">▼ TiL Taken</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Date</label>
+        <input type="date" id="entryDate">
+      </div>
+
+      <div class="form-group">
+        <label>Hours</label>
+        <input type="number" id="entryHours" placeholder="e.g. 3.5" min="0.5" step="0.5">
+      </div>
+
+      <div class="form-group">
+        <label>Reason / Notes</label>
+        <textarea id="entryNotes" placeholder="e.g. Delivered weekend onboarding session"></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="addEntry()" style="width:100%;margin-top:4px">
+        + Log Entry
+      </button>
+    </div>
+
+  </div>
+
+  <!-- ENTRIES TABLE -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">All Entries</span>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-tab" onclick="setFilter('earned', this)">Earned</button>
+        <button class="filter-tab" onclick="setFilter('taken', this)">Taken</button>
+      </div>
+    </div>
+    <div id="tableWrap"></div>
+  </div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'tiltracker_v3';
+  const TRAINERS  = ['Amy', 'Max', 'Mat', 'Jess'];
+  // Approvers = all trainers + line manager
+  const APPROVERS = ['Amy', 'Max', 'Mat', 'Jess', 'Line Manager'];
+
+  let state          = loadState();
+  let currentType    = 'earned';
+  let currentFilter  = 'all';
+  let chartInstance  = null;
+  let pendingApprovalId = null;
+
+  // ── STORAGE ───────────────────────────────────────────────────────────────
+  function loadState() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (saved) return saved;
+    } catch {}
+    const entries = {};
+    TRAINERS.forEach(t => entries[t] = []);
+    return { currentTrainer: 'Amy', entries };
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  function init() {
+    TRAINERS.forEach(t => { if (!state.entries[t]) state.entries[t] = []; });
+    document.getElementById('entryDate').valueAsDate = new Date();
+    document.getElementById('trainerSelect').value = state.currentTrainer;
+    render();
+  }
+
+  // ── TRAINER ───────────────────────────────────────────────────────────────
+  function switchTrainer() {
+    state.currentTrainer = document.getElementById('trainerSelect').value;
+    saveState();
+    render();
+  }
+
+  // ── TYPE TOGGLE ───────────────────────────────────────────────────────────
+  function setType(type) {
+    currentType = type;
+    document.getElementById('typeEarned').className = type === 'earned' ? 'active earned' : '';
+    document.getElementById('typeTaken').className  = type === 'taken'  ? 'active taken'  : '';
+  }
+
+  // ── ADD ENTRY ─────────────────────────────────────────────────────────────
+  function addEntry() {
+    const date  = document.getElementById('entryDate').value;
+    const hours = parseFloat(document.getElementById('entryHours').value);
+    const notes = document.getElementById('entryNotes').value.trim();
+
+    if (!date)               { alert('Please select a date.'); return; }
+    if (isNaN(hours) || hours <= 0) { alert('Please enter a valid number of hours.'); return; }
+
+    const entry = {
+      id:         Date.now(),
+      date,
+      type:       currentType,
+      hours,
+      notes,
+      approved:   currentType === 'earned' ? null : false,
+      approvedBy: null,
+      approvedAt: null
+    };
+
+    state.entries[state.currentTrainer].push(entry);
+    state.entries[state.currentTrainer].sort((a, b) => a.date.localeCompare(b.date));
+    saveState();
+
+    document.getElementById('entryHours').value = '';
+    document.getElementById('entryNotes').value  = '';
+    render();
+  }
+
+  // ── DELETE ────────────────────────────────────────────────────────────────
+  function deleteEntry(id) {
+    if (!confirm('Delete this entry?')) return;
+    state.entries[state.currentTrainer] =
+      state.entries[state.currentTrainer].filter(e => e.id !== id);
+    saveState();
+    render();
+  }
+
+  // ── APPROVAL ──────────────────────────────────────────────────────────────
+  function openApprovalModal(id) {
+    pendingApprovalId = id;
+    const entry = state.entries[state.currentTrainer].find(e => e.id === id);
+    if (!entry) return;
+
+    document.getElementById('modalSub').textContent =
+      `Approving ${entry.hours}h TiL taken on ${formatDate(entry.date)} for ${state.currentTrainer}.
+Select who is approving this request:`;
+
+    const approvers = APPROVERS.filter(a => a !== state.currentTrainer);
+    document.getElementById('approverList').innerHTML = approvers.map(a => `
+      <button class="approver-btn" onclick="confirmApproval('${a}')">
+        <div class="approver-avatar">${initials(a)}</div>
+        <span>${a}</span>
+      </button>`).join('');
+
+    document.getElementById('approvalModal').classList.add('open');
+  }
+
+  function confirmApproval(approverName) {
+    const entries = state.entries[state.currentTrainer];
+    const idx = entries.findIndex(e => e.id === pendingApprovalId);
+    if (idx === -1) return;
+
+    entries[idx].approved   = true;
+    entries[idx].approvedBy = approverName;
+    entries[idx].approvedAt = new Date().toISOString();
+
+    saveState();
+    closeModal();
+    render();
+  }
+
+  function closeModal() {
+    document.getElementById('approvalModal').classList.remove('open');
+    pendingApprovalId = null;
+  }
+
+  document.getElementById('approvalModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ── FILTER ────────────────────────────────────────────────────────────────
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+  }
+
+  // ── RENDER ────────────────────────────────────────────────────────────────
+  function render() {
+    const entries = state.entries[state.currentTrainer] || [];
+    const earned  = entries.filter(e => e.type === 'earned');
+    const taken   = entries.filter(e => e.type === 'taken');
+    const totalEarned = earned.reduce((s, e) => s + e.hours, 0);
+    const totalTaken  = taken.reduce((s, e) => s + e.hours, 0);
+    const balance     = totalEarned - totalTaken;
+    const pending     = taken.filter(e => !e.approved).length;
+
+    document.getElementById('pageTitle').textContent    = state.currentTrainer;
+    document.getElementById('pageSubtitle').textContent =
+      `Time in Lieu balance overview · ${entries.length} total entr${entries.length === 1 ? 'y' : 'ies'}`;
+
+    document.getElementById('kpiBalance').textContent    = balance.toFixed(1) + ' hrs';
+    document.getElementById('kpiBalanceSub').textContent =
+      balance > 0 ? 'In credit' : balance < 0 ? 'In deficit' : 'All square';
+    document.getElementById('kpiAccrued').textContent    = totalEarned.toFixed(1) + ' hrs';
+    document.getElementById('kpiAccruedCount').textContent = earned.length + ` entr${earned.length===1?'y':'ies'}`;
+    document.getElementById('kpiTaken').textContent      = totalTaken.toFixed(1) + ' hrs';
+    document.getElementById('kpiTakenCount').textContent = taken.length + ` entr${taken.length===1?'y':'ies'}`;
+    document.getElementById('kpiPending').textContent    = pending;
+
+    renderChart(entries);
+    renderTable();
+  }
+
+  function renderChart(entries) {
+    const ctx = document.getElementById('balanceChart').getContext('2d');
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    if (!entries.length) return;
+
+    let running = 0;
+    const labels = [], data = [];
+    entries.forEach(e => {
+      running += e.type === 'earned' ? e.hours : -e.hours;
+      labels.push(formatDate(e.date));
+      data.push(parseFloat(running.toFixed(2)));
+    });
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'TiL Balance (hrs)',
+          data,
+          borderColor: '#2147f4',
+          backgroundColor: 'rgba(33,71,244,0.05)',
+          borderWidth: 2,
+          pointBackgroundColor: data.map(v => v >= 0 ? '#2a7d3f' : '#c0392b'),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#19191e',
+            titleFont: { family: 'Arial', size: 12 },
+            bodyFont:  { family: 'Arial', size: 12 },
+            padding: 10,
+            callbacks: {
+              label: ctx => ` ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y} hrs`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: '#f0f0f0' }, ticks: { font: { family: 'Arial', size: 11 }, color: '#777989', maxTicksLimit: 8 } },
+          y: { grid: { color: '#f0f0f0' }, ticks: { font: { family: 'Arial', size: 11 }, color: '#777989' } }
+        }
+      }
+    });
+  }
+
+  function renderTable() {
+    const entries = (state.entries[state.currentTrainer] || [])
+      .filter(e => currentFilter === 'all' || e.type === currentFilter)
+      .slice().reverse();
+
+    const wrap = document.getElementById('tableWrap');
+
+    if (!entries.length) {
+      wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div>No entries yet. Use the form above to log your first TiL entry.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = `
+      <table class="entries-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Hours</th>
+            <th>Notes</th>
+            <th>Approval Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${entries.map(e => `
+            <tr>
+              <td style="white-space:nowrap">${formatDate(e.date)}</td>
+              <td>
+                <span class="badge ${e.type === 'earned' ? 'badge-earned' : 'badge-taken'}">
+                  ${e.type === 'earned' ? '▲ Earned' : '▼ Taken'}
+                </span>
+              </td>
+              <td class="${e.type === 'earned' ? 'hours-pos' : 'hours-neg'}" style="white-space:nowrap">
+                ${e.type === 'earned' ? '+' : '−'}${e.hours.toFixed(1)}h
+              </td>
+              <td style="color:var(--text--dark--30);max-width:240px">${e.notes || '—'}</td>
+              <td style="min-width:180px">${approvalCell(e)}</td>
+              <td><button class="btn-delete" onclick="deleteEntry(${e.id})">Delete</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function approvalCell(e) {
+    if (e.type === 'earned') {
+      return `<span style="color:var(--text--dark--20);font-size:12px">—</span>`;
+    }
+    if (e.approved) {
+      return `
+        <span class="badge badge-approved">✓ Approved</span>
+        <div class="approval-meta">
+          Approved by <strong>${e.approvedBy}</strong><br>
+          ${formatDateTime(e.approvedAt)}
+        </div>`;
+    }
+    return `
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge badge-pending">Pending</span>
+        <button class="btn btn-approve btn-sm" onclick="openApprovalModal(${e.id})">Approve</button>
+      </div>`;
+  }
+
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  function formatDate(dateStr) {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function formatDateTime(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) +
+      ' at ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function initials(name) {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // ── HAMBURGER MENU ────────────────────────────────────────────────────────
+  function toggleMenu() {
+    const btn  = document.getElementById('hamburgerBtn');
+    const menu = document.getElementById('navMenu');
+    btn.classList.toggle('open');
+    menu.classList.toggle('open');
+  }
+
+  function closeMenu() {
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.getElementById('navMenu').classList.remove('open');
+  }
+
+  // Close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.hamburger-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMenu();
+  });
+
+  init();
+</script>
+</body>
+</html>

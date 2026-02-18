@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-Training Feedback</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text-dark-50: #19191e;
+    --text-dark-40: #4c4d57;
+    --text-dark-30: #777989;
+    --card-light-grey: #f8f8f8;
+    --accent-blue-300: #527dff;
+    --accent-blue-200: #7a9cff;
+    --text-dark-20: #a8aabb;
+    --action-primary-blue: #2147f4;
+    --white: #ffffff;
+    --ui-underline-light-grey: #e5e5e5;
+    --success-green: #bde4b9;
+    --brand-yellow: #f1c238;
+    --brand-accent-cream: #f5ede5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-dark-40);
+    background-color: var(--card-light-grey);
+    min-height: 100vh;
+  }
+
+  .survey-wrapper { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+  .survey-header { margin-bottom: 40px; }
+
+  .survey-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-blue-300);
+    background: #eef2ff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .survey-header h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 36px;
+    line-height: 1.15;
+    color: var(--text-dark-50);
+    margin-bottom: 12px;
+  }
+
+  .survey-header h1 em { font-style: italic; color: var(--accent-blue-300); }
+
+  .survey-header p { font-size: 14px; color: var(--text-dark-30); line-height: 1.6; max-width: 520px; }
+
+  .honesty-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--brand-accent-cream);
+    border-left: 3px solid var(--brand-yellow);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text-dark-40);
+    line-height: 1.5;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dark-20);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ui-underline-light-grey);
+    margin-top: 40px;
+  }
+
+  .question-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 12px;
+    border: 1px solid var(--ui-underline-light-grey);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .question-card:focus-within {
+    border-color: var(--accent-blue-200);
+    box-shadow: 0 0 0 3px rgba(82, 125, 255, 0.08);
+  }
+
+  .question-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark-50);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .required-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-blue-300);
+    flex-shrink: 0;
+  }
+
+  .question-sub { font-size: 12px; color: var(--text-dark-30); margin-bottom: 16px; line-height: 1.5; }
+
+  /* Star rating */
+  .star-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .star-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--white);
+  }
+
+  .star-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .star-option input[type="radio"] { display: none; }
+  .star-option input[type="radio"]:checked + .star-label-inner { color: var(--text-dark-50); font-weight: 600; }
+  .star-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; }
+  .star-label-inner { font-size: 13px; color: var(--text-dark-40); user-select: none; }
+  .star-emoji { font-size: 16px; }
+
+  /* Scale */
+  .scale-wrapper { display: flex; flex-direction: column; gap: 6px; }
+  .scale-buttons { display: flex; gap: 8px; width: 100%; }
+
+  .scale-btn {
+    flex: 1; height: 44px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    background: var(--white);
+    font-size: 13px; font-weight: 500;
+    color: var(--text-dark-40);
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 0;
+  }
+
+  .scale-btn:hover { border-color: var(--accent-blue-200); color: var(--accent-blue-300); background: #f5f7ff; }
+  .scale-btn.selected { border-color: var(--accent-blue-300); background: var(--action-primary-blue); color: white; font-weight: 600; }
+
+  .scale-labels-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dark-30); margin-top: 4px; }
+
+  /* Pace */
+  .pace-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .pace-option {
+    flex: 1; min-width: 90px; text-align: center;
+    padding: 10px 12px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px; cursor: pointer;
+    font-size: 13px; color: var(--text-dark-40);
+    background: var(--white); transition: all 0.15s; user-select: none;
+  }
+
+  .pace-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .pace-option input { display: none; }
+  .pace-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; color: var(--text-dark-50); font-weight: 600; }
+
+  /* Inputs */
+  .survey-textarea {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); resize: vertical; min-height: 90px;
+    line-height: 1.6; outline: none; transition: border-color 0.15s;
+    background: var(--white);
+  }
+
+  .survey-textarea:focus { border-color: var(--accent-blue-300); }
+  .survey-textarea::placeholder { color: var(--text-dark-20); }
+
+  .survey-input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); outline: none;
+    transition: border-color 0.15s; background: var(--white); height: 44px;
+  }
+
+  .survey-input:focus { border-color: var(--accent-blue-300); }
+  .survey-input::placeholder { color: var(--text-dark-20); }
+
+  .survey-select {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); outline: none;
+    transition: border-color 0.15s; background: var(--white);
+    height: 44px; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777989' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;
+  }
+
+  .survey-select:focus { border-color: var(--accent-blue-300); }
+
+  /* Yes/No */
+  .yesno-group { display: flex; gap: 8px; margin-bottom: 12px; }
+
+  .yesno-btn {
+    padding: 8px 20px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--text-dark-40);
+    background: var(--white); transition: all 0.15s; user-select: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .yesno-btn:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .yesno-btn.selected-yes { border-color: var(--success-green); background: var(--success-green); color: #1a5c16; font-weight: 600; }
+  .yesno-btn.selected-no { border-color: var(--accent-blue-300); background: #eef2ff; color: var(--action-primary-blue); font-weight: 600; }
+
+  #missing-detail { display: none; }
+
+  /* Identity toggle */
+  .identity-toggle { display: flex; gap: 10px; margin-bottom: 14px; }
+
+  .identity-btn {
+    flex: 1; padding: 14px 16px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 10px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-40); background: var(--white);
+    transition: all 0.2s; text-align: center; user-select: none;
+  }
+
+  .identity-btn:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .identity-btn.active-anon { border-color: #a8aabb; background: #f5f5f7; color: var(--text-dark-50); }
+  .identity-btn.active-named { border-color: var(--accent-blue-300); background: #eef2ff; color: var(--action-primary-blue); }
+  .identity-btn .btn-icon { font-size: 20px; display: block; margin-bottom: 6px; }
+  .identity-btn .btn-title { font-weight: 600; display: block; margin-bottom: 3px; font-size: 13px; }
+  .identity-btn .btn-desc { font-size: 11px; color: var(--text-dark-30); display: block; line-height: 1.4; }
+  .identity-btn.active-named .btn-desc { color: #7a9cff; }
+
+  #company-field { display: none; margin-top: 12px; }
+
+  .identity-note {
+    font-size: 12px; color: var(--text-dark-30);
+    padding: 8px 12px; background: #f8f8f8;
+    border-radius: 6px; margin-top: 2px; display: none;
+  }
+
+  .identity-note.show { display: block; }
+
+  /* NPS */
+  .nps-buttons { display: flex; gap: 4px; flex-wrap: wrap; }
+
+  .nps-btn {
+    width: 44px; height: 40px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 6px; background: var(--white);
+    font-size: 12px; font-weight: 500; color: var(--text-dark-40);
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .nps-btn:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .nps-btn.selected { border-color: var(--accent-blue-300); background: var(--action-primary-blue); color: white; font-weight: 600; }
+  .nps-scale-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dark-30); margin-top: 6px; }
+
+  /* Submit */
+  .submit-area { margin-top: 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+
+  .submit-btn {
+    padding: 13px 32px; background: var(--action-primary-blue);
+    color: white; border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.01em;
+  }
+
+  .submit-btn:hover { background: #1a3cd8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(33, 71, 244, 0.25); }
+  .submit-btn:disabled { background: #a8aabb; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .submit-note { font-size: 12px; color: var(--text-dark-30); }
+
+  /* Success */
+  .success-screen { display: none; text-align: center; padding: 80px 24px; max-width: 480px; margin: 0 auto; }
+  .success-screen.show { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 20px; }
+  .success-screen h2 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text-dark-50); margin-bottom: 10px; }
+  .success-screen p { color: var(--text-dark-30); font-size: 14px; line-height: 1.6; }
+
+  .optional-badge {
+    font-size: 10px; font-weight: 500; color: var(--text-dark-20);
+    background: var(--card-light-grey); padding: 2px 7px;
+    border-radius: 4px; margin-left: 4px;
+  }
+
+/* HEADER NAV */
+  header {
+    background-color: #242326;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .header-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+  .header-sub { font-size: 13px; color: #a8aabb; }
+  .hamburger-wrap { position: relative; flex-shrink: 0; }
+  .hamburger-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 36px; height: 36px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.5); border-radius: 6px; cursor: pointer; gap: 4px; outline: none; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.28); }
+  .hamburger-btn .bar { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s ease; flex-shrink: 0; }
+  .hamburger-btn.open .bar:first-child  { transform: translateY(6px) rotate(45deg); }
+  .hamburger-btn.open .bar:nth-child(2) { opacity: 0; width: 0; }
+  .hamburger-btn.open .bar:last-child   { transform: translateY(-6px) rotate(-45deg); }
+  .nav-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); min-width: 220px; z-index: 9999; overflow: hidden; }
+  .nav-menu.open { display: block; }
+  .nav-menu-header { padding: 10px 14px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a8aabb; border-bottom: 1px solid #e5e5e5; background: #f8f8f8; }
+  .nav-menu a { display: flex; align-items: center; gap: 10px; padding: 11px 14px; text-decoration: none; color: #4c4d57; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e5e5e5; background: #fff; transition: background 0.15s; }
+  .nav-menu a:last-child { border-bottom: none; }
+  .nav-menu a:hover { background: #f8f8f8; color: #19191e; }
+  .nav-menu a .nav-icon { width: 28px; height: 28px; border-radius: 6px; background: #dfe0ec; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="hamburger-wrap">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open navigation">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <div class="nav-menu-header">Navigation</div>
+        <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="til-tracker.html"><span class="nav-icon">⏱</span> TiL Tracker</a>
+        <a href="survey.html" onclick="closeMenu(); return false;"><span class="nav-icon">📝</span> Training Survey</a>
+        <a href="training-request.html"><span class="nav-icon">📋</span> Training Request</a>
+        <a href="https://drive.google.com/file/d/1ksyx7WQ8iOGi9OOU6kYP8tx7rS0j3EII/view?usp=sharing" target="_blank"><span class="nav-icon">📄</span> Training Menu ↗</a>
+      </nav>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-logo">Training Survey</div>
+    <div class="header-divider"></div>
+    <div class="header-sub">Post-Training Feedback</div>
+  </div>
+</header>
+
+<!-- Hidden iframe — absorbs the Apps Script redirect so no CORS error fires -->
+<iframe name="hidden-submit-frame" id="hidden-submit-frame" style="display:none;"></iframe>
+
+<div class="survey-wrapper" id="survey-form">
+
+  <div class="survey-header">
+    <div class="survey-tag">Post-Training Feedback</div>
+    <h1>How did we <em>do?</em></h1>
+    <p>Thanks for joining today's session. Your feedback helps us make future training genuinely better — it takes less than 3 minutes.</p>
+    <div class="honesty-note">
+      💬 Your honest feedback helps us improve future training sessions — constructive comments are genuinely welcome.
+    </div>
+  </div>
+
+  <!-- SESSION DETAILS -->
+  <div class="section-label">Session Details</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Who was your trainer today?</div>
+    <div class="question-sub">Select the name of the trainer who ran your session.</div>
+    <select class="survey-select" id="trainer-select">
+      <option value="" disabled selected>Select a trainer…</option>
+      <option value="Amy">Amy</option>
+      <option value="Max">Max</option>
+      <option value="Mat">Mat</option>
+      <option value="Jess">Jess</option>
+      <option value="Other">Other / I'm not sure</option>
+    </select>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Your Details <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">How would you like to submit your feedback? Both options are completely fine.</div>
+    <div class="identity-toggle">
+      <button class="identity-btn active-anon" id="btn-anon" onclick="setIdentity('anon')">
+        <span class="btn-icon">🕵️</span>
+        <span class="btn-title">Stay anonymous</span>
+        <span class="btn-desc">No name or company will be recorded</span>
+      </button>
+      <button class="identity-btn" id="btn-named" onclick="setIdentity('named')">
+        <span class="btn-icon">🏢</span>
+        <span class="btn-title">Share my company</span>
+        <span class="btn-desc">Helps us tailor future sessions to you</span>
+      </button>
+    </div>
+    <div class="identity-note show" id="anon-note">
+      🔒 Your response will be submitted anonymously — no identifying information will be stored.
+    </div>
+    <div id="company-field">
+      <input type="text" class="survey-input" id="company-name" placeholder="e.g. Acme Property Group">
+    </div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section-label">Section 1 — Core Satisfaction</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Overall Satisfaction</div>
+    <div class="question-sub">How satisfied were you with today's training session?</div>
+    <div class="star-group">
+      <label class="star-option"><input type="radio" name="csat" value="1"><span class="star-label-inner"><span class="star-emoji">⭐</span> Very dissatisfied</span></label>
+      <label class="star-option"><input type="radio" name="csat" value="2"><span class="star-label-inner"><span class="star-emoji">⭐⭐</span> Dissatisfied</span></label>
+      <label class="star-option"><input type="radio" name="csat" value="3"><span class="star-label-inner"><span class="star-emoji">⭐⭐⭐</span> Neutral</span></label>
+      <label class="star-option"><input type="radio" name="csat" value="4"><span class="star-label-inner"><span class="star-emoji">⭐⭐⭐⭐</span> Satisfied</span></label>
+      <label class="star-option"><input type="radio" name="csat" value="5"><span class="star-label-inner"><span class="star-emoji">⭐⭐⭐⭐⭐</span> Very satisfied</span></label>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Usefulness</div>
+    <div class="question-sub">How useful was the session for your day-to-day work?</div>
+    <div class="scale-wrapper">
+      <div class="scale-buttons" id="scale-useful">
+        <button class="scale-btn" onclick="selectScale('scale-useful',this,1)">1</button>
+        <button class="scale-btn" onclick="selectScale('scale-useful',this,2)">2</button>
+        <button class="scale-btn" onclick="selectScale('scale-useful',this,3)">3</button>
+        <button class="scale-btn" onclick="selectScale('scale-useful',this,4)">4</button>
+        <button class="scale-btn" onclick="selectScale('scale-useful',this,5)">5</button>
+      </div>
+      <div class="scale-labels-row"><span>Not useful</span><span>Extremely useful</span></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Clarity of Delivery</div>
+    <div class="question-sub">How clear was the trainer in explaining processes and workflows?</div>
+    <div class="scale-wrapper">
+      <div class="scale-buttons" id="scale-clarity">
+        <button class="scale-btn" onclick="selectScale('scale-clarity',this,1)">1</button>
+        <button class="scale-btn" onclick="selectScale('scale-clarity',this,2)">2</button>
+        <button class="scale-btn" onclick="selectScale('scale-clarity',this,3)">3</button>
+        <button class="scale-btn" onclick="selectScale('scale-clarity',this,4)">4</button>
+        <button class="scale-btn" onclick="selectScale('scale-clarity',this,5)">5</button>
+      </div>
+      <div class="scale-labels-row"><span>Very unclear</span><span>Very clear</span></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Confidence Boost</div>
+    <div class="question-sub">After today, how confident do you feel using the system?</div>
+    <div class="scale-wrapper">
+      <div class="scale-buttons" id="scale-confidence">
+        <button class="scale-btn" onclick="selectScale('scale-confidence',this,1)">1</button>
+        <button class="scale-btn" onclick="selectScale('scale-confidence',this,2)">2</button>
+        <button class="scale-btn" onclick="selectScale('scale-confidence',this,3)">3</button>
+        <button class="scale-btn" onclick="selectScale('scale-confidence',this,4)">4</button>
+        <button class="scale-btn" onclick="selectScale('scale-confidence',this,5)">5</button>
+      </div>
+      <div class="scale-labels-row"><span>Not confident</span><span>Very confident</span></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Pace of the Session</div>
+    <div class="question-sub">How did you find the overall pace of today's training?</div>
+    <div class="pace-group">
+      <label class="pace-option"><input type="radio" name="pace" value="slow"> 🐢 Too slow</label>
+      <label class="pace-option"><input type="radio" name="pace" value="right"> ✅ About right</label>
+      <label class="pace-option"><input type="radio" name="pace" value="fast"> 🚀 Too fast</label>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section-label">Section 2 — Your Thoughts</div>
+
+  <div class="question-card">
+    <div class="question-label">What Worked Well? <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">What was the most helpful part of today's session?</div>
+    <textarea class="survey-textarea" id="helpful" placeholder="e.g. The walkthrough of the reporting module was really clear…"></textarea>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">What Could Be Better? <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">What could we improve for future sessions? Be as honest as you like — this is the most useful feedback we get.</div>
+    <textarea class="survey-textarea" id="improve" placeholder="e.g. Would have liked more time on the invoicing section…"></textarea>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Anything Missing? <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">Was there anything you expected to cover that we didn't?</div>
+    <div class="yesno-group">
+      <button class="yesno-btn" onclick="toggleYesNo(this,'yes')">Yes</button>
+      <button class="yesno-btn" onclick="toggleYesNo(this,'no')">No</button>
+    </div>
+    <div id="missing-detail">
+      <textarea class="survey-textarea" id="missingText" placeholder="Please tell us what you expected to cover…" style="min-height:70px;"></textarea>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section-label">Section 3 — Optional Extras</div>
+
+  <div class="question-card">
+    <div class="question-label">Would You Recommend This Training? <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">How likely are you to recommend this training to a colleague? (0 = not at all, 10 = definitely)</div>
+    <div class="nps-buttons" id="nps-group">
+      <button class="nps-btn" onclick="selectNps(this,0)">0</button>
+      <button class="nps-btn" onclick="selectNps(this,1)">1</button>
+      <button class="nps-btn" onclick="selectNps(this,2)">2</button>
+      <button class="nps-btn" onclick="selectNps(this,3)">3</button>
+      <button class="nps-btn" onclick="selectNps(this,4)">4</button>
+      <button class="nps-btn" onclick="selectNps(this,5)">5</button>
+      <button class="nps-btn" onclick="selectNps(this,6)">6</button>
+      <button class="nps-btn" onclick="selectNps(this,7)">7</button>
+      <button class="nps-btn" onclick="selectNps(this,8)">8</button>
+      <button class="nps-btn" onclick="selectNps(this,9)">9</button>
+      <button class="nps-btn" onclick="selectNps(this,10)">10</button>
+    </div>
+    <div class="nps-scale-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Final Comments <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">Anything else you'd like to share?</div>
+    <textarea class="survey-textarea" id="comments" placeholder="Any other thoughts…"></textarea>
+  </div>
+
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitSurvey()">Submit Feedback →</button>
+    <span class="submit-note" id="submit-note">🔒 Submitting anonymously</span>
+  </div>
+
+</div>
+
+<!-- Success screen -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <h2>Thank you for your feedback!</h2>
+  <p>Your response helps us make every training session better.<br>We really appreciate you taking the time.</p>
+</div>
+
+<script>
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxIjevReAbMe8ZHumcaiVzJytBVlqJQpuq-ygqz1ClEGuLkfwsHQoy2APxtCYL9oxOe/exec";
+
+  function toggleMenu() {
+    document.getElementById('hamburgerBtn').classList.toggle('open');
+    document.getElementById('navMenu').classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.getElementById('navMenu').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.hamburger-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMenu();
+  });
+
+  const scaleValues = {};
+  let npsValue      = null;
+  let missingAnswer = null;
+  let identityMode  = 'anon';
+
+  function selectScale(groupId, btn, value) {
+    document.getElementById(groupId)
+      .querySelectorAll('.scale-btn')
+      .forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    scaleValues[groupId] = value;
+  }
+
+  function selectNps(btn, value) {
+    document.querySelectorAll('.nps-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    npsValue = value;
+  }
+
+  function toggleYesNo(btn, answer) {
+    document.querySelectorAll('.yesno-btn').forEach(b => b.classList.remove('selected-yes','selected-no'));
+    missingAnswer = answer;
+    btn.classList.add(answer === 'yes' ? 'selected-yes' : 'selected-no');
+    document.getElementById('missing-detail').style.display = answer === 'yes' ? 'block' : 'none';
+  }
+
+  function setIdentity(mode) {
+    identityMode = mode;
+    document.getElementById('btn-anon').classList.toggle('active-anon',  mode === 'anon');
+    document.getElementById('btn-anon').classList.toggle('active-named', mode === 'named');
+    document.getElementById('btn-named').classList.toggle('active-named', mode === 'named');
+    document.getElementById('btn-named').classList.toggle('active-anon',  mode === 'anon');
+    document.getElementById('company-field').style.display = mode === 'named' ? 'block' : 'none';
+    document.getElementById('anon-note').classList.toggle('show', mode === 'anon');
+    document.getElementById('submit-note').textContent =
+      mode === 'anon' ? '🔒 Submitting anonymously' : '🏢 Submitting with company name';
+    if (mode === 'named') document.getElementById('company-name').focus();
+  }
+
+  function submitSurvey() {
+    const trainer = document.getElementById('trainer-select').value;
+    const csatEl  = document.querySelector('input[name="csat"]:checked');
+    const paceEl  = document.querySelector('input[name="pace"]:checked');
+
+    if (!trainer) {
+      alert('Please select your trainer before submitting.');
+      document.getElementById('trainer-select').focus();
+      return;
+    }
+    if (!csatEl) {
+      alert('Please rate your overall satisfaction before submitting.');
+      return;
+    }
+
+    const payload = {
+      trainer,
+      identityMode,
+      company:     identityMode === 'named' ? (document.getElementById('company-name').value || '') : '',
+      csat:        Number(csatEl.value),
+      usefulness:  scaleValues['scale-useful']     || '',
+      clarity:     scaleValues['scale-clarity']    || '',
+      confidence:  scaleValues['scale-confidence'] || '',
+      pace:        paceEl ? paceEl.value : '',
+      helpful:     document.getElementById('helpful').value     || '',
+      improve:     document.getElementById('improve').value     || '',
+      missingYN:   missingAnswer || '',
+      missingText: missingAnswer === 'yes' ? (document.getElementById('missingText').value || '') : '',
+      nps:         npsValue === null ? '' : npsValue,
+      comments:    document.getElementById('comments').value || ''
+    };
+
+    // Disable button to prevent double-submit
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    // Build a real HTML form targeting the hidden iframe.
+    // This bypasses CORS entirely — the browser posts directly to Apps Script
+    // and the iframe swallows the redirect response. No CORS error, data lands in sheet.
+    const form  = document.createElement('form');
+    form.method = 'POST';
+    form.action = WEB_APP_URL;
+    form.target = 'hidden-submit-frame';
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = 'payload';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    // Show success after a short delay (gives the POST time to fire)
+    setTimeout(() => {
+      document.getElementById('survey-form').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 800);
+  }
+</script>
+</body>
+</html>

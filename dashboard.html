@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainer Dashboard &mdash; Street Group</title>
+<style>
+  :root {
+    --text--dark--50: #19191e;
+    --brand--black: #242326;
+    --text--dark--40: #4c4d57;
+    --text--dark--30: #777989;
+    --card-light-grey: #f8f8f8;
+    --accent--blue--300: #527dff;
+    --text--dark--20: #a8aabb;
+    --action-primary-blue: #2147f4;
+    --ui--underline--light-grey: #e5e5e5;
+    --brand--secondary--lightgreen: #beffd8;
+    --white-smoke: #fde8eb;
+    --accent--blue--300: #527dff;
+    --brand-accent--cream: #f5ede5;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { color: #333; background: #fff; font-family: Arial, Helvetica, sans-serif; font-size: 14px; line-height: 20px; }
+
+  /* HEADER */
+  header { background: var(--brand--black); height: 56px; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .header-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+  .header-sub { font-size: 13px; color: var(--text--dark--20); }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  /* HAMBURGER */
+  .hamburger-wrap { position: relative; flex-shrink: 0; }
+  .hamburger-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 36px; height: 36px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.5); border-radius: 6px; cursor: pointer; gap: 4px; outline: none; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.28); }
+  .hamburger-btn .bar { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s ease; flex-shrink: 0; }
+  .hamburger-btn.open .bar:first-child  { transform: translateY(6px) rotate(45deg); }
+  .hamburger-btn.open .bar:nth-child(2) { opacity: 0; width: 0; }
+  .hamburger-btn.open .bar:last-child   { transform: translateY(-6px) rotate(-45deg); }
+  .nav-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); min-width: 220px; z-index: 9999; overflow: hidden; }
+  .nav-menu.open { display: block; }
+  .nav-menu-header { padding: 10px 14px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a8aabb; border-bottom: 1px solid #e5e5e5; background: #f8f8f8; }
+  .nav-menu a { display: flex; align-items: center; gap: 10px; padding: 11px 14px; text-decoration: none; color: #4c4d57; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e5e5e5; background: #fff; transition: background 0.15s; }
+  .nav-menu a:last-child { border-bottom: none; }
+  .nav-menu a:hover { background: #f8f8f8; color: #19191e; }
+  .nav-menu a .nav-icon { width: 28px; height: 28px; border-radius: 6px; background: #dfe0ec; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+  /* REFRESH BTN */
+  .btn-refresh { display: inline-flex; align-items: center; gap: 5px; padding: 6px 13px; border-radius: 6px; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: #fff; transition: all 0.15s; }
+  .btn-refresh:hover { background: rgba(255,255,255,0.2); }
+
+  /* LAYOUT */
+  .page-wrap { max-width: 1180px; margin: 0 auto; padding: 28px 24px 60px; }
+  .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; }
+  .page-title { font-size: 22px; font-weight: 700; color: var(--text--dark--50); letter-spacing: -0.02em; }
+  .page-subtitle { font-size: 13px; color: var(--text--dark--30); margin-top: 2px; }
+  .last-updated { font-size: 11px; color: var(--text--dark--20); margin-top: 4px; }
+
+  /* TRAINER DROPDOWN (header) */
+  .header-label { font-size: 12px; color: var(--text--dark--20); }
+  select.trainer-dd {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Arial, sans-serif;
+    cursor: pointer;
+    outline: none;
+    min-width: 120px;
+  }
+  select.trainer-dd option { background: var(--brand--black); color: #fff; }
+  select.trainer-dd:focus { border-color: var(--accent--blue--300); }
+
+  /* KPI */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi-card { background: var(--card-light-grey); border: 1px solid var(--ui--underline--light-grey); border-radius: 8px; padding: 18px 20px; }
+  .kpi-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text--dark--30); margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
+  .kpi-value.blue  { color: var(--action-primary-blue); }
+  .kpi-value.green { color: #2a7d3f; }
+  .kpi-value.red   { color: #c0392b; }
+  .kpi-value.dark  { color: var(--text--dark--50); }
+  .kpi-value.amber { color: #b8710a; }
+  .kpi-sub { font-size: 12px; color: var(--text--dark--30); margin-top: 5px; }
+
+  /* CARD */
+  .card { background: #fff; border: 1px solid var(--ui--underline--light-grey); border-radius: 8px; padding: 22px 24px; }
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--ui--underline--light-grey); }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text--dark--50); }
+  .card-meta { font-size: 12px; color: var(--text--dark--30); }
+
+  /* TWO COL */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+  /* SCORE BARS */
+  .score-rows { display: flex; flex-direction: column; gap: 14px; }
+  .score-row { display: grid; grid-template-columns: 120px 1fr 36px; align-items: center; gap: 12px; }
+  .score-name { font-size: 13px; color: var(--text--dark--40); font-weight: 600; }
+  .bar-track { height: 8px; background: var(--ui--underline--light-grey); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); background: var(--action-primary-blue); }
+  .bar-fill.green { background: #2a7d3f; }
+  .bar-fill.amber { background: #b8710a; }
+  .score-val { font-size: 13px; font-weight: 700; color: var(--text--dark--50); text-align: right; }
+
+  /* PACE */
+  .pace-rows { display: flex; flex-direction: column; gap: 10px; }
+  .pace-item { display: flex; align-items: center; gap: 10px; }
+  .pace-label { font-size: 13px; color: var(--text--dark--40); width: 90px; flex-shrink: 0; font-weight: 600; }
+  .pace-bar-track { flex: 1; height: 8px; background: var(--ui--underline--light-grey); border-radius: 99px; overflow: hidden; }
+  .pace-bar-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.16,1,0.3,1); }
+  .pace-bar-fill.slow  { background: #c0392b; }
+  .pace-bar-fill.right { background: #2a7d3f; }
+  .pace-bar-fill.fast  { background: #b8710a; }
+  .pace-count { font-size: 13px; font-weight: 700; color: var(--text--dark--50); width: 24px; text-align: right; }
+
+  /* FLAGS */
+  .flag-tip { font-size: 12px; color: var(--text--dark--40); padding: 10px 14px; background: #fde8eb; border-left: 3px solid #c0392b; border-radius: 0 6px 6px 0; line-height: 1.5; }
+  .flag-tip.good { background: var(--brand--secondary--lightgreen); border-color: #2a7d3f; color: #1a6632; }
+
+  /* COMMENTS TABLE */
+  .comments-table { width: 100%; border-collapse: collapse; }
+  .comments-table th { font-size: 11px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text--dark--30); padding: 0 12px 10px; text-align: left; border-bottom: 1px solid var(--ui--underline--light-grey); white-space: nowrap; }
+  .comments-table td { padding: 11px 12px; font-size: 13px; border-bottom: 1px solid var(--ui--underline--light-grey); color: var(--text--dark--40); vertical-align: top; }
+  .comments-table tr:last-child td { border-bottom: none; }
+  .comments-table tbody tr:hover td { background: var(--card-light-grey); }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .badge-worked  { background: var(--brand--secondary--lightgreen); color: #1a6632; }
+  .badge-improve { background: var(--brand-accent--cream); color: #8a5a20; }
+  .badge-missing { background: #e8ecff; color: #2147f4; }
+
+  /* STATES */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text--dark--30); font-size: 13px; }
+  .empty-icon { font-size: 28px; margin-bottom: 10px; }
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--ui--underline--light-grey); border-top-color: var(--action-primary-blue); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 4px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* SETUP */
+  .setup-box { background: var(--card-light-grey); border: 1px solid var(--ui--underline--light-grey); border-radius: 8px; padding: 24px; margin-top: 16px; }
+  .setup-box h3 { font-size: 15px; font-weight: 700; color: var(--text--dark--50); margin-bottom: 14px; }
+  .setup-step { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--action-primary-blue); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .setup-step p { font-size: 13px; color: var(--text--dark--40); line-height: 1.6; }
+  .setup-step code { background: #fff; border: 1px solid var(--ui--underline--light-grey); padding: 1px 6px; border-radius: 4px; font-size: 12px; color: var(--action-primary-blue); }
+
+  .dashboard-content { display: none; }
+  .dashboard-content.show { display: block; }
+
+  @media (max-width: 900px) {
+    .kpi-row   { grid-template-columns: 1fr 1fr; }
+    .two-col   { grid-template-columns: 1fr; }
+    header     { padding: 0 16px; }
+    .page-wrap { padding: 20px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="hamburger-wrap">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open navigation">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <div class="nav-menu-header">Navigation</div>
+        <a href="dashboard.html" onclick="closeMenu()">
+          <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="til-tracker.html">
+          <span class="nav-icon">⏱</span> TiL Tracker
+        </a>
+        <a href="survey.html">
+          <span class="nav-icon">📝</span> Training Survey
+        </a>
+        <a href="training-request.html">
+          <span class="nav-icon">📋</span> Training Request
+        </a>
+        <a href="https://drive.google.com/file/d/1ksyx7WQ8iOGi9OOU6kYP8tx7rS0j3EII/view?usp=sharing" target="_blank">
+          <span class="nav-icon">📄</span> Training Menu ↗
+        </a>
+      </nav>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-logo">Trainer Dashboard</div>
+    <div class="header-divider"></div>
+    <div class="header-sub">Post-training CSAT</div>
+  </div>
+  <div class="header-right">
+    <span class="header-label">Product trainer</span>
+    <select class="trainer-dd" id="trainerSelect" onchange="selectTrainerDd()">
+      <option value="Amy">Amy</option>
+      <option value="Max">Max</option>
+      <option value="Mat">Mat</option>
+      <option value="Jess">Jess</option>
+    </select>
+    <button class="btn-refresh" onclick="loadData()">&#x21BB; Refresh</button>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <div class="page-title-row">
+    <div>
+      <div class="page-title" id="pageTitle">Amy</div>
+      <div class="page-subtitle">Training feedback overview</div>
+      <div class="last-updated" id="last-updated"><span class="spinner"></span> Loading data&hellip;</div>
+    </div>
+  </div>
+
+  <div id="loading-state" style="display:none;">
+    <div class="empty-state"><span class="spinner"></span> Fetching responses from Google Sheets&hellip;</div>
+  </div>
+
+  <div id="setup-state" style="display:none;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Setup required</span></div>
+      <p style="font-size:13px;color:var(--text--dark--30);margin-bottom:16px;">Could not connect to Google Sheets. Check the steps below.</p>
+      <div class="setup-box">
+        <h3>How to connect your sheet</h3>
+        <div class="setup-step"><div class="step-num">1</div><p>In Google Sheets click <strong>Share</strong> and set to <strong>Anyone with the link can view</strong>.</p></div>
+        <div class="setup-step"><div class="step-num">2</div><p>Confirm the <code>SHEET_ID</code> in this file matches: <code>1uWTW8cD5PP2wi0XWf8EBR4aDZAoo8cccCMYQNl380uY</code></p></div>
+        <div class="setup-step"><div class="step-num">3</div><p>Confirm the <code>API_KEY</code> has the Google Sheets API enabled.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-content" id="dashboard-content">
+
+    <div class="kpi-row" id="kpi-row"></div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Quality Scores</span>
+          <span class="card-meta">Average out of 5</span>
+        </div>
+        <div class="score-rows" id="score-rows"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Session Pace</span>
+          <span class="card-meta">How respondents found the speed</span>
+        </div>
+        <div class="pace-rows" id="pace-rows"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <span class="card-title">Red Flags</span>
+        <span class="card-meta">Responses rated 1&ndash;2 stars</span>
+      </div>
+      <div id="flags-body"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="comments-title">Recent Comments</span>
+        <span class="card-meta">Open-text responses</span>
+      </div>
+      <div id="comments-body"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const SHEET_ID      = "1uWTW8cD5PP2wi0XWf8EBR4aDZAoo8cccCMYQNl380uY";
+  const RESPONSES_GID = "0";
+  const API_KEY       = "AIzaSyCoqHhMMorLhVPYr4BIDBbqZ85gAGFeTu4";
+  const COL = {
+    timestamp:0, trainer:1, identity:2, company:3,
+    csat:4, usefulness:5, clarity:6, confidence:7,
+    pace:8, helpful:9, improve:10, missingYN:11,
+    missingText:12, nps:13, comments:14
+  };
+
+  let allRows = [];
+  let currentTrainer = 'Amy';
+
+  async function loadData() {
+    document.getElementById('loading-state').style.display = 'block';
+    document.getElementById('setup-state').style.display   = 'none';
+    document.getElementById('dashboard-content').classList.remove('show');
+    document.getElementById('last-updated').innerHTML = '<span class="spinner"></span> Loading&hellip;';
+    const url = 'https://sheets.googleapis.com/v4/spreadsheets/' + SHEET_ID + '/values/A:P?key=' + API_KEY;
+    try {
+      const res  = await fetch(url);
+      if (!res.ok) { const e = await res.json(); throw new Error((e.error && e.error.message) || 'API error'); }
+      const json = await res.json();
+      allRows    = (json.values || []).slice(1);
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('dashboard-content').classList.add('show');
+      document.getElementById('last-updated').textContent =
+        'Last updated ' + new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      renderDashboard(currentTrainer);
+    } catch (e) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('setup-state').style.display   = 'block';
+      document.getElementById('last-updated').textContent    = 'Failed to load';
+      console.error(e);
+    }
+  }
+
+  function selectTrainerDd() {
+    currentTrainer = document.getElementById('trainerSelect').value;
+    renderDashboard(currentTrainer);
+  }
+
+  function selectTrainer(name, btn) {
+    currentTrainer = name;
+    renderDashboard(name);
+  }
+
+  function getRows(t) {
+    return allRows.filter(r => r[COL.trainer] && r[COL.trainer].trim() === t);
+  }
+
+  function avg(rows, col) {
+    const v = rows.map(r => parseFloat(r[col])).filter(v => !isNaN(v));
+    return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  }
+
+  function fmt(v, d) {
+    if (d === undefined) d = 1;
+    return v === null ? '--' : v.toFixed(d);
+  }
+
+  function esc(s) {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderDashboard(trainer) {
+    document.getElementById('pageTitle').textContent = trainer;
+    const rows    = getRows(trainer);
+    const total   = rows.length;
+    const sat     = rows.filter(r => parseFloat(r[COL.csat]) >= 4).length;
+    const csatPct = total ? Math.round(sat / total * 100) : null;
+    const flags   = rows.filter(r => parseFloat(r[COL.csat]) <= 2).length;
+    const nps     = avg(rows, COL.nps);
+
+    // KPIs
+    const csatColor = csatPct === null ? 'dark' : csatPct >= 80 ? 'green' : csatPct >= 60 ? 'amber' : 'red';
+    document.getElementById('kpi-row').innerHTML =
+      kpi('Total Responses', total, 'blue',       'sessions with ' + trainer) +
+      kpi('CSAT Score',      (csatPct !== null ? csatPct + '%' : '--'), csatColor, 'rated 4 or 5 stars') +
+      kpi('Red Flags',       flags,  flags > 0 ? 'red' : 'green', 'rated 1-2 stars') +
+      kpi('Avg NPS',         fmt(nps), 'dark', 'out of 10');
+
+    // Scores
+    const scores = [
+      { n: 'Usefulness',  v: avg(rows, COL.usefulness),  c: 'blue'  },
+      { n: 'Clarity',     v: avg(rows, COL.clarity),     c: 'green' },
+      { n: 'Confidence',  v: avg(rows, COL.confidence),  c: 'amber' }
+    ];
+    document.getElementById('score-rows').innerHTML = scores.map(s =>
+      '<div class="score-row">' +
+        '<div class="score-name">' + s.n + '</div>' +
+        '<div class="bar-track"><div class="bar-fill ' + s.c + '" style="width:' + (s.v !== null ? s.v / 5 * 100 : 0) + '%"></div></div>' +
+        '<div class="score-val">' + fmt(s.v) + '</div>' +
+      '</div>'
+    ).join('');
+
+    // Pace
+    const pc = { slow: 0, right: 0, fast: 0 };
+    rows.forEach(r => {
+      const p = (r[COL.pace] || '').trim().toLowerCase();
+      if (p === 'slow') pc.slow++;
+      else if (p === 'right') pc.right++;
+      else if (p === 'fast') pc.fast++;
+    });
+    const pt = pc.slow + pc.right + pc.fast || 1;
+    document.getElementById('pace-rows').innerHTML =
+      paceRow('Too slow',    'slow',  pc.slow,  pt) +
+      paceRow('About right', 'right', pc.right, pt) +
+      paceRow('Too fast',    'fast',  pc.fast,  pt);
+
+    // Red flags
+    document.getElementById('flags-body').innerHTML =
+      '<div style="font-size:32px;font-weight:700;color:' + (flags > 0 ? '#c0392b' : '#2a7d3f') + ';line-height:1;margin-bottom:4px;">' + flags + '</div>' +
+      '<div style="font-size:12px;color:var(--text--dark--30);margin-bottom:12px;">responses rated 1-2 stars</div>' +
+      '<div class="flag-tip' + (flags === 0 ? ' good' : '') + '">' +
+        (flags === 0
+          ? '&#x2705; No red flags &mdash; great session feedback!'
+          : '&#x26A0;&#xFE0F; ' + flags + ' response' + (flags > 1 ? 's' : '') + ' rated very low. Check comments below for context.') +
+      '</div>';
+
+    // Comments
+    const comments = [];
+    rows.slice().reverse().forEach(r => {
+      const ts = r[COL.timestamp]
+        ? new Date(r[COL.timestamp]).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+        : '';
+      if ((r[COL.helpful]  || '').trim()) comments.push({ badge: 'badge-worked',  label: 'What worked', text: r[COL.helpful],     ts });
+      if ((r[COL.improve]  || '').trim()) comments.push({ badge: 'badge-improve', label: 'Could improve', text: r[COL.improve],    ts });
+      if (r[COL.missingYN] === 'yes' && (r[COL.missingText] || '').trim())
+        comments.push({ badge: 'badge-missing', label: 'Missing', text: r[COL.missingText], ts });
+    });
+
+    document.getElementById('comments-title').textContent = 'Recent Comments (' + comments.length + ')';
+
+    if (!comments.length) {
+      document.getElementById('comments-body').innerHTML =
+        '<div class="empty-state"><div class="empty-icon">&#x1F4AC;</div>No comments yet for ' + trainer + '</div>';
+      return;
+    }
+
+    document.getElementById('comments-body').innerHTML =
+      '<table class="comments-table"><thead><tr><th>Date</th><th>Type</th><th>Comment</th></tr></thead><tbody>' +
+      comments.slice(0, 20).map(c =>
+        '<tr>' +
+          '<td style="white-space:nowrap;color:var(--text--dark--30)">' + c.ts + '</td>' +
+          '<td><span class="badge ' + c.badge + '">' + c.label + '</span></td>' +
+          '<td>' + esc(c.text) + '</td>' +
+        '</tr>'
+      ).join('') +
+      '</tbody></table>';
+  }
+
+  function kpi(label, value, color, sub) {
+    return '<div class="kpi-card"><div class="kpi-label">' + label + '</div><div class="kpi-value ' + color + '">' + value + '</div><div class="kpi-sub">' + sub + '</div></div>';
+  }
+
+  function paceRow(label, cls, count, total) {
+    return '<div class="pace-item"><div class="pace-label">' + label + '</div><div class="pace-bar-track"><div class="pace-bar-fill ' + cls + '" style="width:' + (count / total * 100) + '%"></div></div><div class="pace-count">' + count + '</div></div>';
+  }
+
+  // Hamburger
+  function toggleMenu() {
+    document.getElementById('hamburgerBtn').classList.toggle('open');
+    document.getElementById('navMenu').classList.toggle('open');
+  }
+
+  function closeMenu() {
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.getElementById('navMenu').classList.remove('open');
+  }
+
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.hamburger-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMenu();
+  });
+
+  loadData();
+</script>
+</body>
+</html>

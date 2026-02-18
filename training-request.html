@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training Request — Street</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --text-dark-50: #19191e;
+    --text-dark-40: #4c4d57;
+    --text-dark-30: #777989;
+    --card-light-grey: #f8f8f8;
+    --accent-blue-300: #527dff;
+    --accent-blue-200: #7a9cff;
+    --text-dark-20: #a8aabb;
+    --action-primary-blue: #2147f4;
+    --white: #ffffff;
+    --ui-underline-light-grey: #e5e5e5;
+    --success-green: #bde4b9;
+    --brand-yellow: #f1c238;
+    --brand-accent-cream: #f5ede5;
+    --brand-black: #242326;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--text-dark-40);
+    background-color: var(--card-light-grey);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER NAV ── */
+  header {
+    background-color: var(--brand-black);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+  .header-divider { width: 1px; height: 18px; background: rgba(255,255,255,0.15); }
+  .header-sub { font-size: 13px; color: var(--text-dark-20); }
+  .hamburger-wrap { position: relative; flex-shrink: 0; }
+  .hamburger-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 36px; height: 36px; background: rgba(255,255,255,0.18); border: 2px solid rgba(255,255,255,0.5); border-radius: 6px; cursor: pointer; gap: 4px; outline: none; transition: background 0.15s; }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.28); }
+  .hamburger-btn .bar { display: block; width: 16px; height: 2px; background: #fff; border-radius: 2px; transition: all 0.2s ease; flex-shrink: 0; }
+  .hamburger-btn.open .bar:first-child  { transform: translateY(6px) rotate(45deg); }
+  .hamburger-btn.open .bar:nth-child(2) { opacity: 0; width: 0; }
+  .hamburger-btn.open .bar:last-child   { transform: translateY(-6px) rotate(-45deg); }
+  .nav-menu { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.16); min-width: 220px; z-index: 9999; overflow: hidden; }
+  .nav-menu.open { display: block; }
+  .nav-menu-header { padding: 10px 14px 8px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #a8aabb; border-bottom: 1px solid #e5e5e5; background: #f8f8f8; }
+  .nav-menu a { display: flex; align-items: center; gap: 10px; padding: 11px 14px; text-decoration: none; color: #4c4d57; font-size: 13px; font-weight: 600; border-bottom: 1px solid #e5e5e5; background: #fff; transition: background 0.15s; }
+  .nav-menu a:last-child { border-bottom: none; }
+  .nav-menu a:hover { background: #f8f8f8; color: #19191e; }
+  .nav-menu a .nav-icon { width: 28px; height: 28px; border-radius: 6px; background: #dfe0ec; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+  /* ── FORM WRAPPER ── */
+  .form-wrapper { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+  .form-header { margin-bottom: 40px; }
+
+  .form-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-blue-300);
+    background: #eef2ff;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+
+  .form-header h1 {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 36px;
+    line-height: 1.15;
+    color: var(--text-dark-50);
+    margin-bottom: 12px;
+  }
+
+  .form-header h1 em { font-style: italic; color: var(--accent-blue-300); }
+  .form-header p { font-size: 14px; color: var(--text-dark-30); line-height: 1.6; max-width: 520px; }
+
+  .info-note {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--brand-accent-cream);
+    border-left: 3px solid var(--brand-yellow);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text-dark-40);
+    line-height: 1.5;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dark-20);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ui-underline-light-grey);
+    margin-top: 40px;
+  }
+
+  .question-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 12px;
+    border: 1px solid var(--ui-underline-light-grey);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .question-card:focus-within {
+    border-color: var(--accent-blue-200);
+    box-shadow: 0 0 0 3px rgba(82, 125, 255, 0.08);
+  }
+
+  .question-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark-50);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .required-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent-blue-300);
+    flex-shrink: 0;
+  }
+
+  .question-sub { font-size: 12px; color: var(--text-dark-30); margin-bottom: 16px; line-height: 1.5; }
+
+  .optional-badge {
+    font-size: 10px; font-weight: 500; color: var(--text-dark-20);
+    background: var(--card-light-grey); padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* ── INPUTS ── */
+  .survey-input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); outline: none;
+    transition: border-color 0.15s; background: var(--white); height: 44px;
+  }
+  .survey-input:focus { border-color: var(--accent-blue-300); }
+  .survey-input::placeholder { color: var(--text-dark-20); }
+
+  .survey-textarea {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); resize: vertical; min-height: 90px;
+    line-height: 1.6; outline: none; transition: border-color 0.15s;
+    background: var(--white);
+  }
+  .survey-textarea:focus { border-color: var(--accent-blue-300); }
+  .survey-textarea::placeholder { color: var(--text-dark-20); }
+
+  .survey-select {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); outline: none;
+    transition: border-color 0.15s; background: var(--white);
+    height: 44px; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777989' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;
+  }
+  .survey-select:focus { border-color: var(--accent-blue-300); }
+
+  .survey-date {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text-dark-50); outline: none;
+    transition: border-color 0.15s; background: var(--white); height: 44px;
+  }
+  .survey-date:focus { border-color: var(--accent-blue-300); }
+
+  /* ── CHECKBOX OPTIONS ── */
+  .check-group { display: flex; flex-direction: column; gap: 8px; }
+  .check-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--white);
+  }
+  .check-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .check-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; }
+  .check-option input[type="checkbox"] {
+    width: 16px; height: 16px; min-width: 16px;
+    margin-top: 1px; accent-color: var(--action-primary-blue); cursor: pointer;
+  }
+  .check-label { font-size: 13px; color: var(--text-dark-40); line-height: 1.4; }
+  .check-label strong { display: block; color: var(--text-dark-50); font-weight: 600; margin-bottom: 2px; }
+  .check-label span { font-size: 12px; color: var(--text-dark-30); }
+
+  /* ── RADIO OPTIONS ── */
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--white);
+  }
+  .radio-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .radio-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; }
+  .radio-option input[type="radio"] { width: 16px; height: 16px; accent-color: var(--action-primary-blue); cursor: pointer; }
+  .radio-option .radio-label { font-size: 13px; color: var(--text-dark-40); font-weight: 500; }
+
+  /* ── PILL CHECKBOXES (for modules row) ── */
+  .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill-option {
+    padding: 8px 16px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 20px; cursor: pointer;
+    font-size: 13px; color: var(--text-dark-40);
+    background: var(--white); transition: all 0.15s; user-select: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pill-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .pill-option input { display: none; }
+  .pill-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; color: var(--text-dark-50); font-weight: 600; }
+
+  /* ── SUPPORT CHECKBOXES ── */
+  .support-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .support-option {
+    flex: 1; min-width: 140px; text-align: center;
+    padding: 12px 16px;
+    border: 1.5px solid var(--ui-underline-light-grey);
+    border-radius: 10px; cursor: pointer;
+    font-size: 13px; color: var(--text-dark-40);
+    background: var(--white); transition: all 0.15s; user-select: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .support-option:hover { border-color: var(--accent-blue-200); background: #f5f7ff; }
+  .support-option input { display: none; }
+  .support-option:has(input:checked) { border-color: var(--accent-blue-300); background: #eef2ff; color: var(--text-dark-50); font-weight: 600; }
+  .support-option .support-icon { font-size: 18px; display: block; margin-bottom: 6px; }
+
+  /* ── PACKAGES INFO ── */
+  .packages-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .pkg-card {
+    background: var(--card-light-grey);
+    border: 1px solid var(--ui-underline-light-grey);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .pkg-name { font-size: 12px; font-weight: 600; color: var(--text-dark-50); margin-bottom: 3px; }
+  .pkg-price { font-size: 11px; color: var(--action-primary-blue); font-weight: 600; }
+  .pkg-desc { font-size: 11px; color: var(--text-dark-30); margin-top: 3px; line-height: 1.4; }
+
+  /* ── SUBMIT ── */
+  .submit-area { margin-top: 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .submit-btn {
+    padding: 13px 32px; background: var(--action-primary-blue);
+    color: white; border: none; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; letter-spacing: 0.01em;
+  }
+  .submit-btn:hover { background: #1a3cd8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(33, 71, 244, 0.25); }
+  .submit-btn:disabled { background: #a8aabb; cursor: not-allowed; transform: none; box-shadow: none; }
+  .submit-note { font-size: 12px; color: var(--text-dark-30); }
+
+  /* ── SUCCESS ── */
+  .success-screen { display: none; text-align: center; padding: 80px 24px; max-width: 480px; margin: 0 auto; }
+  .success-screen.show { display: block; }
+  .success-icon { font-size: 48px; margin-bottom: 20px; }
+  .success-screen h2 { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--text-dark-50); margin-bottom: 10px; }
+  .success-screen p { color: var(--text-dark-30); font-size: 14px; line-height: 1.6; }
+
+  /* ── VALIDATION ── */
+  .field-error { font-size: 12px; color: #c0392b; margin-top: 6px; display: none; }
+  .field-error.show { display: block; }
+  input.invalid, textarea.invalid, select.invalid { border-color: #c0392b !important; }
+
+  @media (max-width: 600px) {
+    .packages-grid { grid-template-columns: 1fr; }
+    .support-option { min-width: 100%; }
+    header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hidden iframe for form POST submission (avoids CORS) -->
+<iframe name="hidden-submit-frame" style="display:none;"></iframe>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <div class="hamburger-wrap">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleMenu()" aria-label="Open navigation">
+        <div class="bar"></div>
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </button>
+      <nav class="nav-menu" id="navMenu">
+        <div class="nav-menu-header">Navigation</div>
+        <a href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+        <a href="til-tracker.html"><span class="nav-icon">⏱</span> TiL Tracker</a>
+        <a href="survey.html"><span class="nav-icon">📝</span> Training Survey</a>
+        <a href="training-request.html" onclick="closeMenu(); return false;"><span class="nav-icon">📋</span> Training Request</a>
+        <a href="https://drive.google.com/file/d/1ksyx7WQ8iOGi9OOU6kYP8tx7rS0j3EII/view?usp=sharing" target="_blank"><span class="nav-icon">📄</span> Training Menu ↗</a>
+      </nav>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-logo">Training Request</div>
+    <div class="header-divider"></div>
+    <div class="header-sub">Client Onboarding</div>
+  </div>
+</header>
+
+<!-- FORM -->
+<div class="form-wrapper" id="request-form">
+
+  <div class="form-header">
+    <div class="form-tag">Pre-Training Questionnaire</div>
+    <h1>Book your <em>training</em> session</h1>
+    <p>Use this form to request a training session with our team. We'll use your answers to tailor the agenda and get back to you to confirm a date and time that works.</p>
+    <div class="info-note">
+      📌 Fields marked with a blue dot are required. Packages marked <strong>**</strong> may incur additional costs — these will always be confirmed with your authorised decision-maker before anything is finalised.
+    </div>
+  </div>
+
+  <!-- SECTION 1: CONTACT -->
+  <div class="section-label">Section 1 — Your Details</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Email Address</div>
+    <div class="question-sub">We'll use this to confirm your booking and send over any resources.</div>
+    <input type="email" class="survey-input" id="email" placeholder="you@youragency.co.uk">
+    <div class="field-error" id="err-email">Please enter a valid email address.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Company / Business Name</div>
+    <input type="text" class="survey-input" id="company" placeholder="e.g. Acme Property Group">
+    <div class="field-error" id="err-company">Please enter your company name.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Authorising Stakeholder</div>
+    <div class="question-sub">Please provide the full name and contact number of the person who needs to authorise the training package and costs.</div>
+    <textarea class="survey-textarea" id="stakeholder" placeholder="e.g. Jane Smith, Director — 07700 900000" style="min-height:70px;"></textarea>
+    <div class="field-error" id="err-stakeholder">Please provide the authorising contact's name and number.</div>
+  </div>
+
+  <!-- SECTION 2: TRAINING PACKAGE -->
+  <div class="section-label">Section 2 — Training Package</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Which training package are you interested in?</div>
+    <div class="question-sub">Review the available packages below then select the option that best suits your team.</div>
+
+    <div class="packages-grid">
+      <div class="pkg-card">
+        <div class="pkg-name">📹 On-Demand Videos + Help Centre</div>
+        <div class="pkg-price">Included in setup fee</div>
+        <div class="pkg-desc">Self-paced library of tutorials & 200+ help articles. Includes sandbox account.</div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">🏢 Personalised Onsite — 1 Day **</div>
+        <div class="pkg-price">£1,100 + VAT</div>
+        <div class="pkg-desc">Full day at your office. 10:30am–4:30pm.</div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">🏢 Personalised Onsite — 2 Days **</div>
+        <div class="pkg-price">£1,850 + VAT</div>
+        <div class="pkg-desc">Two full days at your office. 10:30am–4:30pm each day.</div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">💼 Lettings Accounting + Go-Live **</div>
+        <div class="pkg-price">£1,000 + VAT</div>
+        <div class="pkg-desc">Accounting training at your office + live online support on go-live day.</div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">📍 Live at Street HQ, Manchester **</div>
+        <div class="pkg-price">£220 per person + VAT</div>
+        <div class="pkg-desc">Monthly sessions at Street HQ. 10:00am–4:30pm. Discount for 3+ attendees.</div>
+      </div>
+      <div class="pkg-card">
+        <div class="pkg-name">💻 Online Refresher **</div>
+        <div class="pkg-price">TBC</div>
+        <div class="pkg-desc">Remote session for existing users needing a top-up.</div>
+      </div>
+    </div>
+
+    <div class="radio-group" id="package-group">
+      <label class="radio-option"><input type="radio" name="package" value="Personalised Onsite Training – 1 Day"> <span class="radio-label">Personalised Onsite Training – 1 Day **</span></label>
+      <label class="radio-option"><input type="radio" name="package" value="Personalised Onsite Training – 2 Days"> <span class="radio-label">Personalised Onsite Training – 2 Days **</span></label>
+      <label class="radio-option"><input type="radio" name="package" value="Lettings Accounting Training + Go-Live Support"> <span class="radio-label">Lettings Accounting Training + Go-Live Support **</span></label>
+      <label class="radio-option"><input type="radio" name="package" value="Live Training at Street HQ (Manchester)"> <span class="radio-label">Live Training at Street HQ (Manchester) **</span></label>
+      <label class="radio-option"><input type="radio" name="package" value="Online Refresher"> <span class="radio-label">Online Refresher **</span></label>
+      <label class="radio-option"><input type="radio" name="package" value="Not sure yet – please help me choose"> <span class="radio-label">Not sure yet — please help me choose</span></label>
+    </div>
+    <div class="field-error" id="err-package">Please select a training package.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Attendees <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">List the names, job titles, and roles of everyone attending. If anyone needs to leave early, let us know so we can adjust the agenda.</div>
+    <textarea class="survey-textarea" id="attendees" placeholder="e.g. Jane Smith (Director), Tom Hughes (Lettings Manager), Priya Patel (Lettings Negotiator) — Tom may need to leave by 3pm"></textarea>
+  </div>
+
+  <!-- SECTION 3: TEAM EXPERIENCE -->
+  <div class="section-label">Section 3 — Your Team</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> How familiar is your team with Street.co.uk?</div>
+    <div class="radio-group">
+      <label class="radio-option"><input type="radio" name="familiarity" value="Complete Beginners"> <span class="radio-label">🌱 Complete Beginners — we're brand new to Street</span></label>
+      <label class="radio-option"><input type="radio" name="familiarity" value="Mixed Experience"> <span class="radio-label">🔀 Mixed Experience — some know it, others don't</span></label>
+      <label class="radio-option"><input type="radio" name="familiarity" value="Experienced users needing refresher/updates"> <span class="radio-label">🔁 Experienced users — we just need a refresher or update</span></label>
+    </div>
+    <div class="field-error" id="err-familiarity">Please select your team's experience level.</div>
+  </div>
+
+  <!-- SECTION 4: TRAINING GOALS -->
+  <div class="section-label">Section 4 — Training Goals</div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> Which areas of Street do you want to cover?</div>
+    <div class="question-sub">Tick all that apply. This helps us build the right agenda.</div>
+    <div class="pill-group">
+      <label class="pill-option"><input type="checkbox" name="modules" value="Sales"> 🏡 Sales</label>
+      <label class="pill-option"><input type="checkbox" name="modules" value="Lettings Front End"> 🔑 Lettings Front End</label>
+      <label class="pill-option"><input type="checkbox" name="modules" value="Accounting"> 💰 Accounting</label>
+      <label class="pill-option"><input type="checkbox" name="modules" value="Property Management"> 🔧 Property Management</label>
+    </div>
+    <div class="field-error" id="err-modules">Please select at least one area to cover.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label"><span class="required-dot"></span> What are your top 3 priorities for this training day?</div>
+    <div class="question-sub">Be as specific as you like — this is the most useful thing we can know before the session.</div>
+    <textarea class="survey-textarea" id="priorities" placeholder="e.g. 1. Understanding how to manage a sales pipeline end-to-end&#10;2. Setting up automated landlord statements in accounting&#10;3. Using the maintenance module for property management"></textarea>
+    <div class="field-error" id="err-priorities">Please share your top priorities for the session.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Specific Features or Workflows <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">Are there specific features or workflows you want to cover? (e.g. sales progression, lettings compliance, accounting, reporting)</div>
+    <textarea class="survey-textarea" id="specific-features" placeholder="e.g. I'd really like to spend time on the lettings compliance checklist and the automated tenancy renewal workflow…"></textarea>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Current Challenges or Frustrations <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">Are there any current challenges you'd like us to address? If your team has a shared question document, that would be brilliant to share.</div>
+    <textarea class="survey-textarea" id="challenges" placeholder="e.g. We're struggling to reconcile our client account at month-end and aren't sure where we're going wrong…"></textarea>
+  </div>
+
+  <!-- SECTION 5: LOGISTICS -->
+  <div class="section-label">Section 5 — Logistics</div>
+
+  <div class="question-card">
+    <div class="question-label">Training Location <span class="optional-badge">Optional — if not at Street HQ</span></div>
+    <div class="question-sub">Please provide your meeting room name/location, parking and access instructions, and available equipment (projector, large screen, Wi-Fi, extension lead, HDMI cable, etc.).</div>
+    <textarea class="survey-textarea" id="location" placeholder="e.g. Meeting Room 2, 1st floor. Parking available on site — use visitor bays. We have a large projector screen and HDMI. Wi-Fi password will be shared on the day."></textarea>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Target Go-Live Date <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">To help us plan your onboarding and training schedule, can you confirm the target go-live date you're working towards with Street?</div>
+    <input type="date" class="survey-date" id="golive-date">
+  </div>
+
+  <!-- SECTION 6: FOLLOW-UP -->
+  <div class="section-label">Section 6 — Follow-Up</div>
+
+  <div class="question-card">
+    <div class="question-label">How would you like post-training support? <span class="optional-badge">Optional</span></div>
+    <div class="support-group">
+      <label class="support-option"><input type="checkbox" name="support" value="Email recap & resources"><span class="support-icon">📧</span>Email recap &amp; resources</label>
+      <label class="support-option"><input type="checkbox" name="support" value="Follow-up call"><span class="support-icon">📞</span>Follow-up call</label>
+      <label class="support-option"><input type="checkbox" name="support" value="Additional training session"><span class="support-icon">🔄</span>Additional session **</label>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">Anything else we should know? <span class="optional-badge">Optional</span></div>
+    <div class="question-sub">Any other context to make the training valuable for your team — accessibility needs, dietary requirements, specific concerns, etc.</div>
+    <textarea class="survey-textarea" id="anything-else" placeholder="Any other thoughts…"></textarea>
+  </div>
+
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitRequest()">Submit Request →</button>
+    <span class="submit-note">📋 We'll be in touch to confirm your booking</span>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <h2>Request received!</h2>
+  <p>Thanks for submitting your training request. Your details have been logged and a member of the team will be in touch shortly to confirm your session and finalise the agenda.</p>
+</div>
+
+<script>
+  // ─── REPLACE THIS URL AFTER YOU DEPLOY YOUR APPS SCRIPT ───────────────────
+  // See the setup guide below for how to get this URL.
+  const TRAINING_REQUEST_APPS_SCRIPT_URL = "YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+  // ──────────────────────────────────────────────────────────────────────────
+
+  function toggleMenu() {
+    document.getElementById('hamburgerBtn').classList.toggle('open');
+    document.getElementById('navMenu').classList.toggle('open');
+  }
+  function closeMenu() {
+    document.getElementById('hamburgerBtn').classList.remove('open');
+    document.getElementById('navMenu').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.hamburger-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMenu();
+  });
+
+  function validate() {
+    let ok = true;
+
+    function check(id, errId, testFn) {
+      const el = document.getElementById(id);
+      const err = document.getElementById(errId);
+      const val = el ? el.value.trim() : '';
+      if (!testFn(val)) {
+        el.classList.add('invalid');
+        err.classList.add('show');
+        ok = false;
+      } else {
+        el.classList.remove('invalid');
+        err.classList.remove('show');
+      }
+    }
+
+    check('email', 'err-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    check('company', 'err-company', v => v.length > 0);
+    check('stakeholder', 'err-stakeholder', v => v.length > 0);
+    check('priorities', 'err-priorities', v => v.length > 0);
+
+    // Package radio
+    const pkg = document.querySelector('input[name="package"]:checked');
+    const pkgErr = document.getElementById('err-package');
+    if (!pkg) { pkgErr.classList.add('show'); ok = false; }
+    else       { pkgErr.classList.remove('show'); }
+
+    // Familiarity radio
+    const fam = document.querySelector('input[name="familiarity"]:checked');
+    const famErr = document.getElementById('err-familiarity');
+    if (!fam) { famErr.classList.add('show'); ok = false; }
+    else      { famErr.classList.remove('show'); }
+
+    // Modules checkboxes
+    const mods = document.querySelectorAll('input[name="modules"]:checked');
+    const modErr = document.getElementById('err-modules');
+    if (!mods.length) { modErr.classList.add('show'); ok = false; }
+    else              { modErr.classList.remove('show'); }
+
+    return ok;
+  }
+
+  function submitRequest() {
+    if (!validate()) {
+      // Scroll to first error
+      const firstErr = document.querySelector('.field-error.show');
+      if (firstErr) firstErr.closest('.question-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const modules  = [...document.querySelectorAll('input[name="modules"]:checked')].map(e => e.value).join(', ');
+    const support  = [...document.querySelectorAll('input[name="support"]:checked')].map(e => e.value).join(', ');
+    const goLiveRaw = document.getElementById('golive-date').value;
+    const goLive   = goLiveRaw ? new Date(goLiveRaw).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+    const payload = {
+      timestamp:       new Date().toISOString(),
+      email:           document.getElementById('email').value.trim(),
+      company:         document.getElementById('company').value.trim(),
+      stakeholder:     document.getElementById('stakeholder').value.trim(),
+      package:         (document.querySelector('input[name="package"]:checked') || {}).value || '',
+      attendees:       document.getElementById('attendees').value.trim(),
+      familiarity:     (document.querySelector('input[name="familiarity"]:checked') || {}).value || '',
+      modules,
+      priorities:      document.getElementById('priorities').value.trim(),
+      specificFeatures: document.getElementById('specific-features').value.trim(),
+      challenges:      document.getElementById('challenges').value.trim(),
+      location:        document.getElementById('location').value.trim(),
+      goLiveDate:      goLive,
+      support,
+      anythingElse:    document.getElementById('anything-else').value.trim()
+    };
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    // POST via hidden iframe to bypass CORS (same technique as the survey)
+    const form  = document.createElement('form');
+    form.method = 'POST';
+    form.action = TRAINING_REQUEST_APPS_SCRIPT_URL;
+    form.target = 'hidden-submit-frame';
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = 'payload';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    setTimeout(() => {
+      document.getElementById('request-form').style.display = 'none';
+      document.getElementById('success-screen').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 800);
+  }
+</script>
+</body>
+</html>
